@@ -70,6 +70,14 @@ def test_packed_mrope_rejects_unused_grids():
 
 
 @pytest.mark.unit
+def test_single_cp_indices_allow_odd_packed_sequence_lengths():
+    cu_seqlens = torch.tensor([0, 5301, 5632], dtype=torch.int32)
+    indices = get_packed_cp_local_indices(cu_seqlens, cp_size=1, cp_rank=0, device=torch.device("cpu"))
+
+    assert torch.equal(indices, torch.arange(5632))
+
+
+@pytest.mark.unit
 def test_thd_cp_indices_select_two_chunks_per_packed_sequence():
     rank_0 = get_packed_cp_local_indices([0, 8, 16], cp_size=2, cp_rank=0, device=torch.device("cpu"))
     rank_1 = get_packed_cp_local_indices([0, 8, 16], cp_size=2, cp_rank=1, device=torch.device("cpu"))

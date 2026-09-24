@@ -135,6 +135,9 @@ class Qwen3_5VLModel(MegatronModule):
         self.model.visual = (
             _load_vision_model(hf_config, config.params_dtype, config.use_cpu_initialization) if pre_process else None
         )
+        # Megatron recomputation does not cover the standalone HF vision model.
+        if pre_process and config.recompute_granularity == "full":
+            self.model.visual.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
         self.share_embeddings_and_output_weights = self.language_model.share_embeddings_and_output_weights
 
     @property
